@@ -124,8 +124,8 @@ const Index = () => {
       <header className="border-b border-gray-800 bg-black/30 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-white" />
+            <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-black" />
             </div>
             <h1 className="text-3xl font-bold text-white">Kila</h1>
           </div>
@@ -141,7 +141,7 @@ const Index = () => {
       {/* Hero Section */}
       <section className="py-20 text-center">
         <div className="container mx-auto px-4">
-          <h2 className="text-6xl font-bold text-white mb-6 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+          <h2 className="text-6xl font-bold text-white mb-6">
             Kila NFT Collection
           </h2>
           <p className="text-xl text-gray-300 mb-12 max-w-2xl mx-auto">
@@ -151,7 +151,7 @@ const Index = () => {
           {/* NFT Showcase */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12 max-w-4xl mx-auto">
             {nftImages.map((image, index) => (
-              <div key={index} className="bg-gray-900/50 border border-gray-700 rounded-lg p-4 hover:border-purple-500 transition-colors">
+              <div key={index} className="bg-gray-900/50 border border-gray-700 rounded-lg p-4 hover:border-white transition-colors">
                 <img 
                   src={image} 
                   alt={`Kila NFT ${index + 1}`} 
@@ -166,7 +166,7 @@ const Index = () => {
           <Button
             onClick={handleMint}
             disabled={!isWalletConnected || isMinting}
-            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-4 px-8 text-lg"
+            className="bg-white hover:bg-gray-200 text-black font-bold py-4 px-8 text-lg border-2 border-white"
           >
             {isMinting ? (
               <>
@@ -223,7 +223,7 @@ const Index = () => {
                 <Button
                   onClick={handleSearchMint}
                   disabled={!isWalletConnected || isSearchMinting || !searchQuery.trim()}
-                  className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-black font-bold py-3"
+                  className="w-full bg-black hover:bg-gray-800 text-white font-bold py-3 border-2 border-white"
                 >
                   {isSearchMinting ? (
                     <>
