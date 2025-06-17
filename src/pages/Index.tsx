@@ -124,8 +124,12 @@ const Index = () => {
       <header className="border-b border-gray-800 bg-black/30 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-black" />
+            <div className="w-8 h-8 rounded-full overflow-hidden">
+              <img 
+                src="/lovable-uploads/29f9dbfc-369b-48b1-b6f9-04dd72e38269.png" 
+                alt="Kila Logo" 
+                className="w-full h-full object-cover"
+              />
             </div>
             <h1 className="text-3xl font-bold text-white">Kila</h1>
           </div>
