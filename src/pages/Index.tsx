@@ -1,21 +1,45 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Wallet, Search, Sparkles, Loader2 } from "lucide-react";
 import { useWallet, ConnectModal, useAccountBalance } from '@suiet/wallet-kit';
+import { useSuiClientQuery } from '@mysten/dapp-kit';
 import "@suiet/wallet-kit/style.css"
 
 const Index = () => {
   const [isMinting, setIsMinting] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [mintQuantity, setMintQuantity] = useState(1);
+  const [whitelistQuantity, setWhitelistQuantity] = useState(1);
+  const [isWhitelistMinting, setIsWhitelistMinting] = useState(false);
   const [isSearchMinting, setIsSearchMinting] = useState(false);
+  const [whitelistId, setWhitelistId] = useState("");
   const { toast } = useToast();
 
   const { connected, address, disconnect } = useWallet();
   const [showModal, setShowModal] = useState(false);
   const { error, loading, balance } = useAccountBalance();
+
+  const { data, isPending, refetch } = useSuiClientQuery('getOwnedObjects', {
+    owner: address,
+    filter: {
+      MatchAll: [
+        {
+          "StructType": "0x2::kila::Kila"
+        }
+      ]
+    },
+  });
+  useEffect(() => {
+    if (data?.data?.[0]?.data?.objectId) {
+      setWhitelistId(data.data[0].data.objectId as string);
+    }
+  }, [data]);
+  console.log(whitelistId);
+
+  const isWhitelisted = connected && whitelistId !== "";
 
   const nftImages = [
     "/lovable-uploads/29f9dbfc-369b-48b1-b6f9-04dd72e38269.png",
@@ -42,7 +66,8 @@ const Index = () => {
 
       toast({
         title: "Minting Successful!",
-        description: "Successfully minted your Kila NFT!",
+        description: `Successfully minted ${mintQuantity} Kila NFT${mintQuantity > 1 ? 's' : ''}!`,
+
       });
     } catch (error) {
       toast({
@@ -54,6 +79,37 @@ const Index = () => {
       setIsMinting(false);
     }
   };
+
+  const handleWhitelistMint = async () => {
+    if (!connected) {
+      toast({
+        title: "Wallet Not Connected",
+        description: "Please connect your wallet to mint NFTs",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsWhitelistMinting(true);
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      toast({
+        title: "Whitelist Mint Successful!",
+        description: `Successfully minted ${whitelistQuantity} whitelist NFT${whitelistQuantity > 1 ? 's' : ''}!`,
+      });
+    } catch (error) {
+      toast({
+        title: "Minting Failed",
+        description: "Failed to mint whitelist NFT. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsWhitelistMinting(false);
+    }
+  };
+
 
   const handleSearchMint = async () => {
     if (!connected) {
@@ -119,10 +175,10 @@ const Index = () => {
                   setShowModal(true);
                 }
               }}
-              className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
+              className="bg-white hover:bg-gray-100 text-black font-bold py-2 px-4 rounded"
             >
               {connected
-                ? `${address.slice(0, 5)}...${address.slice(-5)} • ${loading ? '...' : `${Number(balance) / 1e9} SUI`}`
+                ? `${address.slice(0, 5)}...${address.slice(-5)} • ${loading ? '...' : `${(Number(balance) / 1e9).toFixed(2)} SUI`}`
                 : 'Connect'}
             </button>
 
@@ -161,38 +217,118 @@ const Index = () => {
             Discover and mint unique Kila NFTs on the Sui blockchain. Connect your wallet and start collecting!
           </p>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12 max-w-4xl mx-auto">
-            {nftImages.map((image, index) => (
-              <div key={index} className="bg-gray-900/50 border border-gray-700 rounded-lg p-4 hover:border-white transition-colors">
-                <img
-                  src={image}
-                  alt={`Kila NFT ${index + 1}`}
-                  className="w-full h-48 object-cover rounded-lg mb-2"
-                />
-                <p className="text-gray-400 text-sm">Kila #{index + 1}</p>
+          <div className="mb-12">
+            <div className="md:grid md:grid-cols-4 gap-6 hidden max-w-4xl mx-auto">
+              {nftImages.map((image, index) => (
+                <div key={index} className="bg-gray-900/50 border border-gray-700 rounded-lg p-4 hover:border-white transition-colors">
+                  <img
+                    src={image}
+                    alt={`Kila NFT ${index + 1}`}
+                    className="w-full h-48 object-cover rounded-lg mb-2"
+                  />
+                  <p className="text-gray-400 text-sm">Kila #{index + 1}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Horizontal scroll on small screens */}
+            <div className="md:hidden overflow-x-auto">
+              <div className="flex space-x-4 px-4">
+                {nftImages.map((image, index) => (
+                  <div
+                    key={index}
+                    className="flex-shrink-0 w-64 bg-gray-900/50 border border-gray-700 rounded-lg p-4 hover:border-white transition-colors"
+                  >
+                    <img
+                      src={image}
+                      alt={`Kila NFT ${index + 1}`}
+                      className="w-full h-48 object-cover rounded-lg mb-2"
+                    />
+                    <p className="text-gray-400 text-sm">Kila #{index + 1}</p>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
 
 
+          <div className="flex items-center justify-center space-x-2 mb-6">
+            <Button
+              variant="outline"
+              onClick={() => setMintQuantity(prev => Math.max(1, prev - 1))}
+              className="w-12 h-12 text-lg"
+            >
+              -
+            </Button>
 
-          <Button
-            onClick={handleMint}
-            disabled={!connected || isMinting}
-            className="bg-white hover:bg-gray-200 text-black font-bold py-4 px-8 text-lg border-2 border-white"
-          >
-            {isMinting ? (
-              <>
-                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                Minting...
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-5 h-5 mr-2" />
-                Mint Kila NFT
-              </>
-            )}
-          </Button>
+            <Button
+              onClick={handleMint}
+              disabled={!connected || isMinting}
+              className="w-56 h-12 bg-white hover:bg-gray-200 text-black font-bold text-lg border-2 border-white flex items-center justify-center space-x-2"
+            >
+              {isMinting ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>Minting...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-5 h-5" />
+                  <span>Mint {mintQuantity > 1 ? `${mintQuantity} Kila` : 'Kila'}</span>
+                </>
+              )}
+            </Button>
+
+            <Button
+              variant="outline"
+              onClick={() => setMintQuantity(prev => prev + 1)}
+              className="w-12 h-12 text-lg"
+            >
+              +
+            </Button>
+          </div>
+
+          {isWhitelisted && (
+            <div className="flex items-center justify-center space-x-2 mt-6">
+              <Button
+                variant="outline"
+                onClick={() => setWhitelistQuantity(prev => Math.max(1, prev - 1))}
+                className="w-12 h-12 text-lg"
+              >
+                -
+              </Button>
+
+              <Button
+                onClick={handleWhitelistMint}
+                disabled={!connected || isWhitelistMinting}
+                className="w-56 h-12 bg-white hover:bg-gray-200 text-black font-bold text-lg border-2 border-white flex items-center justify-center space-x-2"
+              >
+                {isWhitelistMinting ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span>Minting Whitelist...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-5 h-5" />
+                    <span>
+                      Mint kila {whitelistQuantity > 1 ? `${whitelistQuantity} Whitelist` : 'Whitelist'}
+                    </span>
+                  </>
+                )}
+              </Button>
+
+              <Button
+                variant="outline"
+                onClick={() => setWhitelistQuantity(prev => Math.min(4, prev + 1))}
+                className="w-12 h-12 text-lg"
+              >
+                +
+              </Button>
+            </div>
+          )}
+
+
 
           {!connected && (
             <p className="text-yellow-400 text-sm mt-4">
@@ -265,7 +401,7 @@ const Index = () => {
       {/* Footer */}
       <footer className="border-t border-gray-800 bg-black/30 backdrop-blur-sm py-8">
         <div className="container mx-auto px-4 text-center">
-          <p className="text-gray-400">© 2024 Kila. Built on Sui Blockchain.</p>
+          <p className="text-gray-400">© 2025 Kila. Built on Sui Blockchain.</p>
         </div>
       </footer>
     </div>

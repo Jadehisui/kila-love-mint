@@ -23,7 +23,7 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <SuiClientProvider networks={networkConfig} defaultNetwork='devnet'>
+    <SuiClientProvider networks={networkConfig}>
       <WalletProvider >
         <TooltipProvider>
           <Toaster />
